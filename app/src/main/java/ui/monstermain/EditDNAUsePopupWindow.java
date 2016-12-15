@@ -15,11 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.pollinationp.gemster.R;
-
 import core.Common;
 import core.CustomOnTouchListener;
 import core.SoundManager;
+import pollinationp.gemster.R;
 import ui.EffectManager;
 
 /**

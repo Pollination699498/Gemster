@@ -11,10 +11,9 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ImageButton;
 
-import com.pollinationp.gemster.R;
-
 import core.CustomOnTouchListener;
 import core.SoundManager;
+import pollinationp.gemster.R;
 import ui.EffectManager;
 
 /**

@@ -7,12 +7,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.bumptech.glide.Glide;
-import com.pollinationp.gemster.R;
 
 import java.util.ArrayList;
 
 import core.Common;
 import core.monsterbook.MonsterBookItem;
+import pollinationp.gemster.R;
 
 /**
  * Created by WONSEOK OH on 2016-12-10.

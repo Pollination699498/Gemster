@@ -4,9 +4,8 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 
-import com.pollinationp.gemster.R;
-
 import core.SoundManager;
+import pollinationp.gemster.R;
 import ui.monsterbook.MonsterBookFragment;
 import ui.monstermain.MonsterMainFragment;
 

@@ -12,9 +12,9 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.pollinationp.gemster.R;
-
 import java.util.ArrayList;
+
+import pollinationp.gemster.R;
 
 /**
  * Created by WONSEOK OH on 2016-12-04.

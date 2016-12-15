@@ -3,8 +3,6 @@ package core;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.pollinationp.gemster.R;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import core.monsterbook.MonsterBookItem;
+import pollinationp.gemster.R;
 
 /**
  * Created by WONSEOK OH on 2016-12-04.

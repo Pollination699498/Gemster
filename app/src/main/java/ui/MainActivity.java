@@ -3,7 +3,7 @@ package ui;
 import android.app.Activity;
 import android.os.Bundle;
 
-import com.pollinationp.gemster.R;
+import pollinationp.gemster.R;
 
 public class MainActivity extends Activity {
 

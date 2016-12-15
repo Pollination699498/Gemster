@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Gemster</string>
-    <string name="banner_ad_unit_id">ca-app-pub-6742502407672292/2415877961</string>
-    <string name="unity_ads_game_id">1230727</string>
+    <string name="banner_ad_unit_id">ca-app-pub-6451836038436342/3808573111</string>
+    <string name="unity_ads_game_id">1233067</string>
+    <string name="app_id">699241765550</string>
 </resources>

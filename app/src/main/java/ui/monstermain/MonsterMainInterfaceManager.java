@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.pollinationp.gemster.R;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.mediation.IUnityAdsExtendedListener;
 
@@ -30,6 +29,7 @@ import java.text.DecimalFormat;
 import core.Common;
 import core.CustomOnTouchListener;
 import core.SoundManager;
+import pollinationp.gemster.R;
 import ui.EffectManager;
 
 /**
@@ -422,9 +422,12 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     }
 
     private void initAds() {
+        // Google AdMob
         AdView mAdView = (AdView) mActivity.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+
+        // Unity Ads
         initUnityAds();
     }
 
