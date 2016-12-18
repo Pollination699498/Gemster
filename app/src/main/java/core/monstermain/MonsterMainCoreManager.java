@@ -7,6 +7,7 @@ import android.os.Handler;
 import java.util.Timer;
 
 import core.Common;
+import core.GemsterApp;
 import core.RepeatTimerTask;
 import core.RepeatUpdater;
 import ui.monstermain.MonsterMainInterfaceManager;
@@ -169,6 +170,8 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
         } else {
             Common.setPrefData(mContext, Common.MAIN_TIER, "0");
         }
+
+        // GemsterApp.getInstance().getClient().cloudSaveUpdate();
 
         mHandler.post(new Runnable() {
             @Override

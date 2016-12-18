@@ -64,7 +64,7 @@ public class MainManager implements MonsterMainFragment.EventListener {
     }
 
     public void handleActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (GemsterApp.getInstance().getClient().handleActivityResult(requestCode, resultCode)) {
+        if (GemsterApp.getInstance().getClient().handleActivityResult(requestCode, resultCode, intent)) {
             return;
         }
     }

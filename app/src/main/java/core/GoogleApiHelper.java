@@ -4,14 +4,19 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.appstate.AppStateManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.Player;
@@ -32,9 +37,12 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
     // Are we currently resolving a connection failure?
     private boolean mResolvingConnectionFailure = false;
 
-    // request codes we use when invoking an external activity
-    private static final int RC_RESOLVE = 5000;
-    private static final int RC_UNUSED = 5001;
+    // The AppState slot we are editing.  For simplicity this sample only manipulates a single
+    // Cloud Save slot and a corresponding Snapshot entry,  This could be changed to any integer
+    // 0-3 without changing functionality (Cloud Save has four slots, numbered 0-3).
+    private static final int APP_STATE_KEY = 0;
+
+    // Request code used to invoke sign-in UI.
     private static final int RC_SIGN_IN = 9001;
 
     // achievements and scores we're pending to push to the cloud
@@ -48,7 +56,9 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
         mGoogleApiClient = new GoogleApiClient.Builder(mActivity)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
-                .addApi(Games.API).addScope(Games.SCOPE_GAMES)
+                .addApi(Games.API).addScope(Games.SCOPE_GAMES) // Games
+                .addApi(AppStateManager.API).addScope(AppStateManager.SCOPE_APP_STATE) // AppState
+                .addScope(Drive.SCOPE_APPFOLDER) // SavedGames
                 .build();
     }
 
@@ -74,7 +84,7 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
         return mGoogleApiClient.isConnected();
     }
 
-    public boolean handleActivityResult(int requestCode, int resultCode) {
+    public boolean handleActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == RC_SIGN_IN) {
             mResolvingConnectionFailure = false;
             if (resultCode == Activity.RESULT_OK) {
@@ -103,6 +113,8 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
 
         Log.d(TAG, "player name = " + displayName);
 
+        // GemsterApp.getInstance().getClient().cloudSaveLoad();
+
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
             pushAccomplishments();
@@ -130,6 +142,84 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
 
     private boolean isSignedIn() {
         return (mGoogleApiClient != null && mGoogleApiClient.isConnected());
+    }
+
+    /**
+     * Async load AppState from Cloud Save.  This will load using stateKey APP_STATE_KEY.  After load,
+     * the AppState data and metadata will be displayed.
+     */
+    public void cloudSaveLoad() {
+        PendingResult<AppStateManager.StateResult> pendingResult = AppStateManager.load(
+                mGoogleApiClient, APP_STATE_KEY);
+
+        ResultCallback<AppStateManager.StateResult> callback =
+                new ResultCallback<AppStateManager.StateResult>() {
+                    @Override
+                    public void onResult(AppStateManager.StateResult stateResult) {
+                        if (stateResult.getStatus().isSuccess()) {
+                            // Successfully loaded data from App State
+                            Log.d(TAG, "cloud_save_load_success");
+                            byte[] data = stateResult.getLoadedResult().getLocalData();
+                            setData(new String(data));
+                            displayAppStateMetadata(stateResult.getLoadedResult().getStateKey());
+                        } else {
+                            // Failed to load data from App State
+                            Log.d(TAG, "cloud_save_load_failure");
+                        }
+                    }
+                };
+        pendingResult.setResultCallback(callback);
+    }
+
+    /**
+     * Async update AppState data in Cloud Save.  This will use stateKey APP_STATE_KEY. After save,
+     * the UI will be cleared and the data will be available to load from Cloud Save.
+     */
+    public void cloudSaveUpdate() {
+        // Use the data from the EditText as AppState data
+        byte[] data = getData().getBytes();
+
+        // Use updateImmediate to update the AppState data.  This is used for diagnostic purposes
+        // so that the app can display the result of the update, however it is generally recommended
+        // to use AppStateManager.update(...) in order to reduce performance and battery impact.
+        PendingResult<AppStateManager.StateResult> pendingResult = AppStateManager.updateImmediate(
+                mGoogleApiClient, APP_STATE_KEY, data);
+
+        ResultCallback<AppStateManager.StateResult> callback =
+                new ResultCallback<AppStateManager.StateResult>() {
+                    @Override
+                    public void onResult(AppStateManager.StateResult stateResult) {
+                        if (stateResult.getStatus().isSuccess()) {
+                            Log.d(TAG, "cloud_save_update_success");
+                        } else {
+                            Log.d(TAG, "cloud_save_update_failure");
+                        }
+                    }
+                };
+        pendingResult.setResultCallback(callback);
+    }
+
+    private void setData(String data) {
+        Log.d("wonseok", "set Data : " + data);
+    }
+
+    private String getData() {
+        int spec = (int) Common.getPrefData(GemsterApp.getInstance(), Common.MAIN_SPEC);
+        int tier = (int) Common.getPrefData(GemsterApp.getInstance(), Common.MAIN_TIER);
+        String result = "spen : " + String.valueOf(spec) + ", tier : " + String.valueOf(tier);
+        Log.d("wonseok", "get Data : " + result);
+        return result;
+    }
+
+    /**
+     * Display metadata about AppState save data,
+     *
+     * @param stateKey the slot stateKey of the AppState.
+     */
+    private void displayAppStateMetadata(int stateKey) {
+        String metadataStr = "Source: Cloud Save" + '\n'
+                + "State Key: " + stateKey;
+        Log.d(TAG, metadataStr);
     }
 
     void pushAccomplishments() {
