@@ -36,7 +36,7 @@ import ui.EffectManager;
  * Created by WONSEOK OH on 2016-12-04.
  */
 
-public class MonsterMainInterfaceManager implements EffectManager.EffectCompleteListener, EditDNAUsePopupWindow.EventListener {
+public class MonsterMainInterfaceManager implements EffectManager.EffectCompleteListener, EditDNAUsePopupWindow.EventListener, SettingPopupWindow.EventListener {
 
     private final Context mContext;
     private final Activity mActivity;
@@ -45,6 +45,7 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     private final UnityAdsListener unityAdsListener = new UnityAdsListener();
 
     private EditDNAUsePopupWindow mEditDNAUsePopupWindow;
+    private SettingPopupWindow mSettingPopupWindow;
 
     private TextView mTextViewDebug;
     private LinearLayout mLinearLayoutDNACount;
@@ -106,6 +107,9 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
 
         mEditDNAUsePopupWindow = new EditDNAUsePopupWindow(mActivity, mEffectManager);
         mEditDNAUsePopupWindow.setEventListener(this);
+
+        mSettingPopupWindow = new SettingPopupWindow(mActivity, mEffectManager);
+        mSettingPopupWindow.setEventListener(this);
     }
 
     public void init() {
@@ -150,6 +154,7 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     private void processActionUp(View view) {
         if (view == null) return;
         if (view.equals(mImageButtonSetting)) {
+            showSetting();
         } else if (view.equals(mImageButtonMonsterBook)) {
             openMonsterBook();
         } else if (view.equals(mImageButtonBoost)) {
@@ -229,6 +234,10 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
 
     private void editDNAUse() {
         mEditDNAUsePopupWindow.show(mActivity.findViewById(android.R.id.content));
+    }
+
+    private void showSetting() {
+        mSettingPopupWindow.show(mActivity.findViewById(android.R.id.content));
     }
 
     private void initViews() {
@@ -439,6 +448,9 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
         if (mEditDNAUsePopupWindow.isShowing()) {
             mEditDNAUsePopupWindow.dismiss();
         }
+        if (mSettingPopupWindow.isShowing()) {
+            mSettingPopupWindow.dismiss();
+        }
     }
 
     public void call(CallMode mode) {
@@ -512,7 +524,13 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     @Override
     public void onCompleteEditDNAUseEvent() {
         setGameView();
+    }
 
+    @Override
+    public void onSettingEvent(SettingPopupWindow.EventList event) {
+        if (SettingPopupWindow.EventList.EVENT_SIGN.equals(event)) {
+
+        }
     }
 
     private class UnityAdsListener implements IUnityAdsExtendedListener {

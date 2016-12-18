@@ -3,7 +3,10 @@ package ui;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 
+import core.GemsterApp;
+import core.GoogleApiHelper;
 import core.SoundManager;
 import pollinationp.gemster.R;
 import ui.monsterbook.MonsterBookFragment;
@@ -24,12 +27,12 @@ public class MainManager implements MonsterMainFragment.EventListener {
     public MainManager(Activity activity) {
         mActivity = activity;
 
+        SoundManager.init(mActivity);
+        initGoogleApiHelper();
+
         initFragmentManager();
         initMainFragment();
         initMonsterBookFragment();
-
-        init();
-        SoundManager.init(mActivity);
     }
 
     private void initFragmentManager() {
@@ -43,12 +46,27 @@ public class MainManager implements MonsterMainFragment.EventListener {
 
     private void initMonsterBookFragment() {
         mMonsterBookFragment = (MonsterBookFragment) mFragmentManager.findFragmentById(R.id.fragment_monster_book);
-    }
-
-    private void init() {
         FragmentTransaction ft = mFragmentManager.beginTransaction();
         ft.hide(mMonsterBookFragment);
         ft.commit();
+    }
+
+    private void initGoogleApiHelper() {
+        GemsterApp.getInstance().setClient(new GoogleApiHelper(mActivity));
+    }
+
+    public void handleStart() {
+        GemsterApp.getInstance().getClient().connect();
+    }
+
+    public void handleStop() {
+        GemsterApp.getInstance().getClient().disconnect();
+    }
+
+    public void handleActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (GemsterApp.getInstance().getClient().handleActivityResult(requestCode, resultCode)) {
+            return;
+        }
     }
 
     protected void openMonsterBook() {

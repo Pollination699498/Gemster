@@ -1,11 +1,14 @@
 package ui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 import pollinationp.gemster.R;
 
 public class MainActivity extends Activity {
+
+    private final String TAG = "MainActivity";
 
     private MainManager mMainManager;
 
@@ -24,6 +27,18 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        mMainManager.handleStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMainManager.handleStop();
+    }
+
+    @Override
     protected void onResume() {
         mMainManager.resume();
         super.onResume();
@@ -33,6 +48,12 @@ public class MainActivity extends Activity {
     protected void onPause() {
         mMainManager.pause();
         super.onPause();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        mMainManager.handleActivityResult(requestCode, resultCode, intent);
     }
 
     @Override

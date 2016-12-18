@@ -96,6 +96,15 @@ public class Common {
         return false;
     }
 
+    public static boolean isAbleToEvol(Context context) {
+        int maxTier = getMaxTier(context);
+        int tier = (int) Common.getPrefData(context, Common.MAIN_TIER);
+        if (tier + 1 >= maxTier) {
+            return false;
+        }
+        return true;
+    }
+
     public static int getMaxTier(Context context) {
         int spec = (int) Common.getPrefData(context, Common.MAIN_SPEC);
         int[] arrMaxTier = context.getResources().getIntArray(R.array.array_max_tier_of_spec);
@@ -152,7 +161,8 @@ public class Common {
     }
 
     public static double getPerProb(int tier) {
-        double base = 0.6f;
+        //double base = 0.6f;
+        double base = 1.0f;
         double result = Math.pow(base, tier + 1);
         return result;
     }

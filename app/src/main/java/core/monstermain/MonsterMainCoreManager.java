@@ -114,7 +114,7 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
     }
 
     private void tryEvolution() {
-        if (Common.isExceptionalTier(mContext)) {
+        if (!Common.isAbleToEvol(mContext)) {
             mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.UTIL_BUTTONS_ENABLE);
             return;
         }
@@ -236,6 +236,10 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
         mListener.onMainFragmentEvent(EventMode.EVENT_OPEN_MONSTER_BOOK);
     }
 
+    public void dismissPopupWindow() {
+        mInterfaceManager.dismissPopupWindow();
+    }
+
     @Override
     public void onMainInterfaceEvent(MonsterMainInterfaceManager.EventMode mode, Object param) {
         if (MonsterMainInterfaceManager.EventMode.EVENT_SHOW_TOAST.equals(mode)) {
@@ -296,9 +300,5 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
         }
 
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.DEBUG_INFO_SET, desc);
-    }
-
-    public void dismissPopupWindow() {
-        mInterfaceManager.dismissPopupWindow();
     }
 }
