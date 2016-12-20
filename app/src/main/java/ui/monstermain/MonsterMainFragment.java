@@ -42,7 +42,7 @@ public class MonsterMainFragment extends Fragment implements MonsterMainCoreMana
         super.onCreate(savedInstanceState);
         mContext = getActivity();
         mActivity = getActivity();
-        Common.initSharedPrefData(mContext);
+        Common.initSharedPrefData();
     }
 
     @Nullable

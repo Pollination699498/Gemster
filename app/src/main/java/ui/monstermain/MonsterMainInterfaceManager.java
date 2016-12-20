@@ -311,8 +311,8 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     }
 
     private void setImageViewMonsterImage(boolean afterEvolution) {
-        int spec = (int) Common.getPrefData(mContext, Common.MAIN_SPEC);
-        int tier = (int) Common.getPrefData(mContext, Common.MAIN_TIER);
+        int spec = (int) Common.getPrefData(Common.MAIN_SPEC);
+        int tier = (int) Common.getPrefData(Common.MAIN_TIER);
         int id = Common.getGemDrawableId(mContext, spec, tier);
         if (afterEvolution) {
             mEffectManager.changeMonsterImageViewWithAnimation(mContext, mImageButtonMonster, id);
@@ -323,15 +323,15 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     }
 
     private void setTextViewMonsterName() {
-        int tier = (int) Common.getPrefData(mContext, Common.MAIN_TIER);
+        int tier = (int) Common.getPrefData(Common.MAIN_TIER);
         String[] arrName = mContext.getResources().getStringArray(R.array.array_evol_name);
         String name = arrName[tier];
         mTextViewMonsterName.setText(name);
     }
 
     private void setTextViewMonsterProb() {
-        int tier = (int) Common.getPrefData(mContext, Common.MAIN_TIER);
-        int useDNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA_USE);
+        int tier = (int) Common.getPrefData(Common.MAIN_TIER);
+        int useDNA = (int) Common.getPrefData(Common.MAIN_DNA_USE);
         double perProb = Common.getPerProb(tier);
         double prob = perProb * useDNA;
 
@@ -374,7 +374,7 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     }
 
     private void startGetDNAEffect(int quantity) {
-        int toValue = (int) Common.getPrefData(mContext, Common.MAIN_DNA);
+        int toValue = (int) Common.getPrefData(Common.MAIN_DNA);
         int fromValue = toValue - quantity;
         fromValue = fromValue < 0 ? 0 : fromValue;
         mEffectManager.startCountAnimation(mTextViewDNACount, fromValue, toValue);
@@ -390,13 +390,13 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
     }
 
     private void setTextViewDNACount() {
-        int count = (int) Common.getPrefData(mContext, Common.MAIN_DNA);
+        int count = (int) Common.getPrefData(Common.MAIN_DNA);
         mTextViewDNACount.setText(String.valueOf(count));
         setTextVerticalShader(mTextViewDNACount, Color.GRAY, Color.DKGRAY);
     }
 
     private void setTextViewDNAUse() {
-        int count = (int) Common.getPrefData(mContext, Common.MAIN_DNA_USE);
+        int count = (int) Common.getPrefData(Common.MAIN_DNA_USE);
         mTextViewDNAUse.setText(String.valueOf(count));
         setTextVerticalShader(mTextViewDNAUse, Color.GRAY, Color.DKGRAY);
     }

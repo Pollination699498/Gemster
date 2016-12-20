@@ -83,6 +83,9 @@ public class SettingPopupWindow extends PopupWindow {
         mCheckboxEffectSound = (CheckBox) getContentView().findViewById(R.id.spw_checkBox_effectSound);
         mSignButton = (SignInButton) getContentView().findViewById(R.id.spw_signInButton);
         mImageButtonCredit = (ImageButton) getContentView().findViewById(R.id.spw_imageButton_credit);
+
+        mCheckboxBGSound.setChecked(!(boolean) Common.getPrefData(Common.DISABLE_BGM));
+        mCheckboxEffectSound.setChecked(!(boolean) Common.getPrefData(Common.DISABLE_EFFECT_SOUND));
     }
 
     private void initListener() {
@@ -173,6 +176,12 @@ public class SettingPopupWindow extends PopupWindow {
         if (view.equals(mImageButtonClose)) {
             dismiss();
         } else if (view.equals(mImageButtonCredit)) {
+        } else if (view.equals(mCheckboxBGSound)) {
+            mCheckboxBGSound.setChecked(!mCheckboxBGSound.isChecked());
+            SoundManager.setEnabledBGM(mCheckboxBGSound.isChecked());
+        } else if (view.equals(mCheckboxEffectSound)) {
+            mCheckboxEffectSound.setChecked(!mCheckboxEffectSound.isChecked());
+            SoundManager.setEnabledEffectSound(mCheckboxEffectSound.isChecked());
         }
     }
 }

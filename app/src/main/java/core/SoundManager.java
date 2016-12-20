@@ -33,10 +33,10 @@ public class SoundManager {
             mSoundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 1);
         }
         mSoundIdClick = mSoundPool.load(activity, R.raw.sm_click, 1);
-
     }
 
     public static void startBGM() {
+        if ((boolean) Common.getPrefData(Common.DISABLE_BGM)) return;
         mBGM.start();
     }
 
@@ -49,9 +49,23 @@ public class SoundManager {
     }
 
     public static void startSound(SoundEnum sound) {
+        if ((boolean) Common.getPrefData(Common.DISABLE_EFFECT_SOUND)) return;
         if (SoundEnum.CLICK.equals(sound)) {
             mSoundPool.play(mSoundIdClick, 1, 1, 1, 0, 1);
         }
+    }
+
+    public static void setEnabledBGM(boolean enable) {
+        Common.setPrefData(Common.DISABLE_BGM, String.valueOf(!enable));
+        if (enable) {
+            startBGM();
+        } else {
+            pauseBGM();
+        }
+    }
+
+    public static void setEnabledEffectSound(boolean enable) {
+        Common.setPrefData(Common.DISABLE_EFFECT_SOUND, String.valueOf(!enable));
     }
 
 }

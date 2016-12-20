@@ -60,7 +60,7 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
 
     private void handleExceptionalTierCase() {
         if (Common.isExceptionalTier(mContext)) {
-            Common.setPrefData(mContext, Common.MAIN_TIER, "0");
+            Common.setPrefData(Common.MAIN_TIER, "0");
         }
     }
 
@@ -98,10 +98,10 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
     }
 
     private void completeGettingDNA() {
-        int feed = (int) Common.getPrefData(mContext, Common.MAIN_DNA);
-        int tier = (int) Common.getPrefData(mContext, Common.MAIN_TIER);
+        int feed = (int) Common.getPrefData(Common.MAIN_DNA);
+        int tier = (int) Common.getPrefData(Common.MAIN_TIER);
         final int quantity = Common.getDNAQuantity(tier);
-        Common.setPrefData(mContext, Common.MAIN_DNA, String.valueOf(feed + quantity));
+        Common.setPrefData(Common.MAIN_DNA, String.valueOf(feed + quantity));
 
         mHandler.post(new Runnable() {
             @Override
@@ -120,8 +120,8 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
             return;
         }
 
-        int DNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA);
-        int useDNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA_USE);
+        int DNA = (int) Common.getPrefData(Common.MAIN_DNA);
+        int useDNA = (int) Common.getPrefData(Common.MAIN_DNA_USE);
 
         if (DNA < 1) {
             mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.UTIL_BUTTONS_ENABLE);
@@ -129,7 +129,7 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
         }
 
         DNA -= useDNA;
-        Common.setPrefData(mContext, Common.MAIN_DNA, String.valueOf(DNA));
+        Common.setPrefData(Common.MAIN_DNA, String.valueOf(DNA));
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.DNA_COUNT_SET);
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.MONSTER_EFFECT_EVOLUTION_WHILE_START);
 
@@ -138,23 +138,23 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
     }
 
     private void setUseDNA(boolean isEvolSuccess) {
-        int DNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA);
-        int useDNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA_USE);
+        int DNA = (int) Common.getPrefData(Common.MAIN_DNA);
+        int useDNA = (int) Common.getPrefData(Common.MAIN_DNA_USE);
 
         if (DNA == 0 || useDNA > DNA) {
             useDNA = ((DNA == 0) ? 1 : DNA);
-            Common.setPrefData(mContext, Common.MAIN_DNA_USE, String.valueOf(useDNA));
+            Common.setPrefData(Common.MAIN_DNA_USE, String.valueOf(useDNA));
         } else if (!isEvolSuccess) {
             int count = Common.getCompleteDNAUseCount(0);
             if (count < useDNA) {
-                Common.setPrefData(mContext, Common.MAIN_DNA_USE, String.valueOf(count));
+                Common.setPrefData(Common.MAIN_DNA_USE, String.valueOf(count));
             }
         }
     }
 
     private void completeTryEvolution() {
-        final int tier = (int) Common.getPrefData(mContext, Common.MAIN_TIER);
-        final int useDNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA_USE);
+        final int tier = (int) Common.getPrefData(Common.MAIN_TIER);
+        final int useDNA = (int) Common.getPrefData(Common.MAIN_DNA_USE);
 
         double perProb = Common.getPerProb(tier);
         double prob = perProb * useDNA;
@@ -164,11 +164,11 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
         setUseDNA(result);
 
         if (result) {
-            Common.setPrefData(mContext, Common.MAIN_TIER, String.valueOf(tier + 1));
-            final int spec = (int) Common.getPrefData(mContext, Common.MAIN_SPEC);
-            Common.setIsCollected(mContext, spec, tier + 1);
+            Common.setPrefData(Common.MAIN_TIER, String.valueOf(tier + 1));
+            final int spec = (int) Common.getPrefData(Common.MAIN_SPEC);
+            Common.setIsCollected(spec, tier + 1);
         } else {
-            Common.setPrefData(mContext, Common.MAIN_TIER, "0");
+            Common.setPrefData(Common.MAIN_TIER, "0");
         }
 
         GemsterApp.getInstance().getClient().savedGamesUpdate();
@@ -205,10 +205,10 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
     }
 
     private void incrementDNAUse() {
-        int useDNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA_USE);
-        int DNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA);
+        int useDNA = (int) Common.getPrefData(Common.MAIN_DNA_USE);
+        int DNA = (int) Common.getPrefData(Common.MAIN_DNA);
 
-        int count = Common.getCurrentCompleteDNAUseCount(mContext);
+        int count = Common.getCurrentCompleteDNAUseCount();
         boolean isNeedIncrement = useDNA < count;
 
         if (isNeedIncrement && useDNA < DNA) {
@@ -217,20 +217,20 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
                 useDNA = DNA;
             }
         }
-        Common.setPrefData(mContext, Common.MAIN_DNA_USE, String.valueOf(useDNA));
+        Common.setPrefData(Common.MAIN_DNA_USE, String.valueOf(useDNA));
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.DNA_USE_SET);
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.MONSTER_PROB_SET);
     }
 
     private void decrementDNAUSE() {
-        int useDNA = (int) Common.getPrefData(mContext, Common.MAIN_DNA_USE);
+        int useDNA = (int) Common.getPrefData(Common.MAIN_DNA_USE);
         if (useDNA > 1) {
             useDNA -= 1;
             if (useDNA < 0) {
                 useDNA = 1;
             }
         }
-        Common.setPrefData(mContext, Common.MAIN_DNA_USE, String.valueOf(useDNA));
+        Common.setPrefData(Common.MAIN_DNA_USE, String.valueOf(useDNA));
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.DNA_USE_SET);
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.MONSTER_PROB_SET);
     }

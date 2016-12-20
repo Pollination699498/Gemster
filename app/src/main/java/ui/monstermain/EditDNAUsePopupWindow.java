@@ -139,7 +139,7 @@ public class EditDNAUsePopupWindow extends PopupWindow implements CustomEditText
     }
 
     private void setDNAUseCount() {
-        int count = (int) Common.getPrefData(mActivity, Common.MAIN_DNA_USE);
+        int count = (int) Common.getPrefData(Common.MAIN_DNA_USE);
         mEditTextDNAUse.setText(String.valueOf(count));
     }
 
@@ -151,7 +151,7 @@ public class EditDNAUsePopupWindow extends PopupWindow implements CustomEditText
     }
 
     private void processPositive() {
-        int DNACount = (int) Common.getPrefData(mActivity, Common.MAIN_DNA);
+        int DNACount = (int) Common.getPrefData(Common.MAIN_DNA);
         int useCount = Integer.parseInt(mEditTextDNAUse.getText().toString());
 
         if (DNACount < useCount) {
@@ -159,7 +159,7 @@ public class EditDNAUsePopupWindow extends PopupWindow implements CustomEditText
             return;
         }
 
-        Common.setPrefData(mActivity, Common.MAIN_DNA_USE, String.valueOf(useCount));
+        Common.setPrefData(Common.MAIN_DNA_USE, String.valueOf(useCount));
         mListener.onCompleteEditDNAUseEvent();
         dismiss();
     }

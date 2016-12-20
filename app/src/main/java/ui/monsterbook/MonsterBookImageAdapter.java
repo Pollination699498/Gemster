@@ -56,7 +56,7 @@ public class MonsterBookImageAdapter extends BaseAdapter {
         }
 
         MonsterBookCustomImageView imageViewThumbnail = (MonsterBookCustomImageView) view.findViewById(R.id.MBI_imageView_thumbnail);
-        if (!Common.isCollected(mContext, item.mMonsterKey)) {
+        if (!Common.isCollected(item.mMonsterKey)) {
             Glide.with(mContext).load(R.drawable.ic_mbi_question_mark).into(imageViewThumbnail);
         } else {
             int resourceId = mMonsterBookItemList.get(position % mMonsterBookItemList.size()).mResourceId;

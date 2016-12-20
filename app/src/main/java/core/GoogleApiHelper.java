@@ -191,6 +191,11 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
     }
 
     public void savedGamesUpdate(final boolean isChangeAccount) {
+
+        if (mGoogleApiClient.isConnecting() || !mGoogleApiClient.isConnected()) {
+            return;
+        }
+
         final String snapshotName = makeSnapshotName(APP_STATE_KEY);
         final boolean createIfMissing = true;
 
