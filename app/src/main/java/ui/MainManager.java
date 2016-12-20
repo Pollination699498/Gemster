@@ -112,6 +112,7 @@ public class MainManager implements MonsterMainFragment.EventListener, GoogleApi
     public void pause() {
         SoundManager.pauseBGM();
         dismissPopupWindow();
+        GemsterApp.getInstance().getClient().savedGamesUpdate();
     }
 
     public boolean backPressed() {

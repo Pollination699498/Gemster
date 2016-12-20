@@ -116,7 +116,7 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
             if (resultCode == Activity.RESULT_OK) {
                 mGoogleApiClient.connect();
             } else {
-                showActivityResultError(mActivity, requestCode, resultCode, "signin_other_error");
+                showActivityResultError(mActivity, requestCode, resultCode, "Please sign in to keep your game data");
             }
             return true;
         }
@@ -161,7 +161,7 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
 
         mResolvingConnectionFailure = true;
         if (!resolveConnectionFailure(mActivity, mGoogleApiClient, connectionResult,
-                RC_SIGN_IN, "Please sign in for save your game data")) {
+                RC_SIGN_IN, "sign_in_other_error")) {
             mResolvingConnectionFailure = false;
         }
     }
