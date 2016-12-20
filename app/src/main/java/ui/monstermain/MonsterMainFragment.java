@@ -70,6 +70,10 @@ public class MonsterMainFragment extends Fragment implements MonsterMainCoreMana
         mListener.onMainFragmentEvent(EventMode.EVENT_EVOLUTION_SUCCESS);
     }
 
+    public void updateGameView() {
+        mMonsterMainCoreManager.updateGameView();
+    }
+
     public void dismissPopupWindow() {
         mMonsterMainCoreManager.dismissPopupWindow();
     }

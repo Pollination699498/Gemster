@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,11 +45,6 @@ public class Common {
 
     public static String getMonsterKey(int spec, int tier) {
         return spec + "_" + tier;
-    }
-
-    public static void setPrefData(Context context, String key, HashMap<String, Boolean> map) {
-        JSONObject jsonObject = new JSONObject(map);
-        setPrefData(context, key, jsonObject.toString());
     }
 
     private static boolean isIntegerValue(String key) {
@@ -129,7 +125,8 @@ public class Common {
             String key = getMonsterKey(spec, tier);
             map.put(key, true);
 
-            setPrefData(context, MAIN_DATA_COLLECT, map);
+            JSONObject jsonObject = new JSONObject(map);
+            setPrefData(context, MAIN_DATA_COLLECT, jsonObject.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -193,6 +190,50 @@ public class Common {
             }
         }
         return mListItem;
+    }
+
+    public static byte[] getUserData() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            Context context = GemsterApp.getInstance();
+            jsonObject.put(MAIN_SPEC, String.valueOf((int) getPrefData(context, MAIN_SPEC)));
+            jsonObject.put(MAIN_TIER, String.valueOf((int) getPrefData(context, MAIN_TIER)));
+            jsonObject.put(MAIN_DNA, String.valueOf((int) getPrefData(context, MAIN_DNA)));
+            jsonObject.put(MAIN_DNA_USE, String.valueOf((int) getPrefData(context, MAIN_DNA_USE)));
+            jsonObject.put(MAIN_DATA_COLLECT, getPrefData(context, MAIN_DATA_COLLECT));
+            return jsonObject.toString().getBytes("UTF-8");
+        } catch (JSONException je) {
+            je.printStackTrace();
+        } catch (UnsupportedEncodingException usee) {
+            usee.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static void setUserData(byte[] data) {
+        try {
+            JSONObject jsonObject = new JSONObject(new String(data, "UTF-8"));
+            Context context = GemsterApp.getInstance();
+            setPrefData(context, MAIN_SPEC, jsonObject.get(MAIN_SPEC).toString());
+            setPrefData(context, MAIN_TIER, jsonObject.get(MAIN_TIER).toString());
+            setPrefData(context, MAIN_DNA, jsonObject.get(MAIN_DNA).toString());
+            setPrefData(context, MAIN_DNA_USE, jsonObject.get(MAIN_DNA_USE).toString());
+            setPrefData(context, MAIN_DATA_COLLECT, jsonObject.get(MAIN_DATA_COLLECT).toString());
+        } catch (JSONException je) {
+            je.printStackTrace();
+        } catch (UnsupportedEncodingException usee) {
+            usee.printStackTrace();
+        }
+    }
+
+    public static void resetUserData() {
+        Context context = GemsterApp.getInstance();
+        Common.setPrefData(context, Common.MAIN_TIER, Common.getDefaultValue(Common.MAIN_TIER));
+        Common.setPrefData(context, Common.MAIN_DNA, Common.getDefaultValue(Common.MAIN_DNA));
+        Common.setPrefData(context, Common.MAIN_DNA_USE, Common.getDefaultValue(Common.MAIN_DNA_USE));
+        Common.setPrefData(context, Common.MAIN_DATA_COLLECT, "");
+        Common.setIsCollected(context, 0, 0);
     }
 
 }

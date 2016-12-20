@@ -434,6 +434,7 @@ public class MonsterMainInterfaceManager implements EffectManager.EffectComplete
         // Google AdMob
         AdView mAdView = (AdView) mActivity.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
+
         mAdView.loadAd(adRequest);
 
         // Unity Ads

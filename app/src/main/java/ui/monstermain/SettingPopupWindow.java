@@ -16,7 +16,6 @@ import com.google.android.gms.common.SignInButton;
 
 import core.CustomOnTouchListener;
 import core.GemsterApp;
-import core.GoogleApiHelper;
 import core.SoundManager;
 import pollinationp.gemster.R;
 import ui.EffectManager;
@@ -30,7 +29,6 @@ public class SettingPopupWindow extends PopupWindow {
     private Activity mActivity;
 
     private EffectManager mEffectManager;
-    private GoogleApiHelper mPlayServiceManager;
 
     private ImageButton mImageButtonClose;
     private CheckBox mCheckboxBGSound;
@@ -57,7 +55,6 @@ public class SettingPopupWindow extends PopupWindow {
         super(activity);
         mActivity = activity;
         mEffectManager = effectManager;
-        mPlayServiceManager = new GoogleApiHelper(mActivity);
 
         init();
     }
@@ -137,7 +134,7 @@ public class SettingPopupWindow extends PopupWindow {
     private void setSignButtonText() {
         String desc;
         if (GemsterApp.getInstance().getClient().isConnected()) {
-            desc = "sign out".toUpperCase();
+            desc = "change account".toUpperCase();
         } else {
             desc = "sign in".toUpperCase();
         }
@@ -152,7 +149,7 @@ public class SettingPopupWindow extends PopupWindow {
 
     private void handleSign() {
         if (GemsterApp.getInstance().getClient().isConnected()) {
-            GemsterApp.getInstance().getClient().signOut();
+            GemsterApp.getInstance().getClient().savedGamesUpdate(true);
             setSignButtonText();
         } else {
             GemsterApp.getInstance().getClient().connect();

@@ -3,9 +3,11 @@ package core;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,6 +22,11 @@ import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.Player;
+import com.google.android.gms.games.snapshot.Snapshot;
+import com.google.android.gms.games.snapshot.SnapshotMetadataChange;
+import com.google.android.gms.games.snapshot.Snapshots;
+
+import java.io.IOException;
 
 /**
  * Created by WONSEOK OH on 2016-12-16.
@@ -45,11 +52,24 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
     // Request code used to invoke sign-in UI.
     private static final int RC_SIGN_IN = 9001;
 
+    // Progress Dialog used to display loading messages.
+    private ProgressDialog mProgressDialog;
+
     // achievements and scores we're pending to push to the cloud
     // (waiting for the user to sign in, for instance)
     AccomplishmentsOutbox mOutbox = new AccomplishmentsOutbox();
 
-    public GoogleApiHelper(Activity activity) {
+    private EventListener mListener;
+
+    public interface EventListener {
+        void completeLoadSavedData();
+    }
+
+    public void setEventListener(EventListener listener) {
+        mListener = listener;
+    }
+
+    public GoogleApiHelper(Activity activity, EventListener listener) {
         mActivity = activity;
 
         // Create the Google API Client with access to Games
@@ -60,6 +80,8 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
                 .addApi(AppStateManager.API).addScope(AppStateManager.SCOPE_APP_STATE) // AppState
                 .addScope(Drive.SCOPE_APPFOLDER) // SavedGames
                 .build();
+
+        mListener = listener;
     }
 
     public void connect() {
@@ -74,10 +96,14 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
         }
     }
 
-    public void signOut() {
-        Log.d(TAG, "signOut");
+    public void changeAccount() {
+        Log.d(TAG, "changeAccount");
         Games.signOut(mGoogleApiClient);
         disconnect();
+        connect();
+
+        Common.resetUserData();
+        mListener.completeLoadSavedData();
     }
 
     public boolean isConnected() {
@@ -113,7 +139,7 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
 
         Log.d(TAG, "player name = " + displayName);
 
-        // GemsterApp.getInstance().getClient().cloudSaveLoad();
+        GemsterApp.getInstance().getClient().savedGamesLoad();
 
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
@@ -140,86 +166,128 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
         }
     }
 
+    /**
+     * Generate a unique Snapshot name from an AppState stateKey.
+     *
+     * @param appStateKey the stateKey for the Cloud Save data.
+     * @return a unique Snapshot name that maps to the stateKey.
+     */
+    private String makeSnapshotName(int appStateKey) {
+        return "Snapshot-" + String.valueOf(appStateKey);
+    }
+
     private boolean isSignedIn() {
         return (mGoogleApiClient != null && mGoogleApiClient.isConnected());
     }
 
     /**
-     * Async load AppState from Cloud Save.  This will load using stateKey APP_STATE_KEY.  After load,
-     * the AppState data and metadata will be displayed.
+     * Update the Snapshot in the Saved Games service with new data.  Metadata is not affected,
+     * however for your own application you will likely want to update metadata such as cover image,
+     * played time, and description with each Snapshot update.  After update, the UI will
+     * be cleared.
      */
-    public void cloudSaveLoad() {
-        PendingResult<AppStateManager.StateResult> pendingResult = AppStateManager.load(
-                mGoogleApiClient, APP_STATE_KEY);
+    public void savedGamesUpdate() {
+        savedGamesUpdate(false);
+    }
 
-        ResultCallback<AppStateManager.StateResult> callback =
-                new ResultCallback<AppStateManager.StateResult>() {
+    public void savedGamesUpdate(final boolean isChangeAccount) {
+        final String snapshotName = makeSnapshotName(APP_STATE_KEY);
+        final boolean createIfMissing = true;
+
+        // Use the data from the EditText as the new Snapshot data.
+        final byte[] data = getData();
+
+        AsyncTask<Void, Void, Boolean> updateTask = new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected void onPreExecute() {
+                if (isChangeAccount) {
+                    showProgressDialog("Saving...");
+                }
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                Snapshots.OpenSnapshotResult open = Games.Snapshots.open(
+                        mGoogleApiClient, snapshotName, createIfMissing).await();
+
+                if (!open.getStatus().isSuccess()) {
+                    Log.w(TAG, "Could not open Snapshot for update.");
+                    return false;
+                }
+
+                // Change data but leave existing metadata
+                Snapshot snapshot = open.getSnapshot();
+                snapshot.getSnapshotContents().writeBytes(data);
+
+                Snapshots.CommitSnapshotResult commit = Games.Snapshots.commitAndClose(
+                        mGoogleApiClient, snapshot, SnapshotMetadataChange.EMPTY_CHANGE).await();
+
+                if (!commit.getStatus().isSuccess()) {
+                    Log.w(TAG, "Failed to commit Snapshot.");
+                    return false;
+                }
+
+                // No failures
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if (result) {
+                    Log.d(TAG, "saved_games_update_success");
+                } else {
+                    Log.d(TAG, "saved_games_update_failure");
+                }
+                if (isChangeAccount) {
+                    changeAccount();
+                    dismissProgressDialog();
+                }
+            }
+        };
+        updateTask.execute();
+    }
+
+    /**
+     * Load a Snapshot from the Saved Games service based on its unique name.  After load, the UI
+     * will update to display the Snapshot data and SnapshotMetadata.
+     */
+    public void savedGamesLoad() {
+        String snapshotName = makeSnapshotName(APP_STATE_KEY);
+        PendingResult<Snapshots.OpenSnapshotResult> pendingResult = Games.Snapshots.open(
+                mGoogleApiClient, snapshotName, false);
+
+        showProgressDialog("Loading...");
+        ResultCallback<Snapshots.OpenSnapshotResult> callback =
+                new ResultCallback<Snapshots.OpenSnapshotResult>() {
                     @Override
-                    public void onResult(AppStateManager.StateResult stateResult) {
-                        if (stateResult.getStatus().isSuccess()) {
-                            // Successfully loaded data from App State
-                            Log.d(TAG, "cloud_save_load_success");
-                            byte[] data = stateResult.getLoadedResult().getLocalData();
-                            setData(new String(data));
-                            displayAppStateMetadata(stateResult.getLoadedResult().getStateKey());
+                    public void onResult(Snapshots.OpenSnapshotResult openSnapshotResult) {
+                        if (openSnapshotResult.getStatus().isSuccess()) {
+                            Log.d(TAG, "string.saved_games_load_success");
+                            byte[] data = new byte[0];
+                            try {
+                                data = openSnapshotResult.getSnapshot().getSnapshotContents().readFully();
+                            } catch (IOException e) {
+                                Log.d(TAG, "Exception reading snapshot: " + e.getMessage());
+                            }
+                            setData(data);
                         } else {
-                            // Failed to load data from App State
-                            Log.d(TAG, "cloud_save_load_failure");
+                            Log.d(TAG, "string.saved_games_load_failure");
                         }
+                        dismissProgressDialog();
                     }
                 };
         pendingResult.setResultCallback(callback);
     }
 
-    /**
-     * Async update AppState data in Cloud Save.  This will use stateKey APP_STATE_KEY. After save,
-     * the UI will be cleared and the data will be available to load from Cloud Save.
-     */
-    public void cloudSaveUpdate() {
-        // Use the data from the EditText as AppState data
-        byte[] data = getData().getBytes();
-
-        // Use updateImmediate to update the AppState data.  This is used for diagnostic purposes
-        // so that the app can display the result of the update, however it is generally recommended
-        // to use AppStateManager.update(...) in order to reduce performance and battery impact.
-        PendingResult<AppStateManager.StateResult> pendingResult = AppStateManager.updateImmediate(
-                mGoogleApiClient, APP_STATE_KEY, data);
-
-        ResultCallback<AppStateManager.StateResult> callback =
-                new ResultCallback<AppStateManager.StateResult>() {
-                    @Override
-                    public void onResult(AppStateManager.StateResult stateResult) {
-                        if (stateResult.getStatus().isSuccess()) {
-                            Log.d(TAG, "cloud_save_update_success");
-                        } else {
-                            Log.d(TAG, "cloud_save_update_failure");
-                        }
-                    }
-                };
-        pendingResult.setResultCallback(callback);
+    private void setData(byte[] data) {
+        Common.setUserData(data);
+        if (mListener != null) {
+            mListener.completeLoadSavedData();
+        }
     }
 
-    private void setData(String data) {
-        Log.d("wonseok", "set Data : " + data);
-    }
-
-    private String getData() {
-        int spec = (int) Common.getPrefData(GemsterApp.getInstance(), Common.MAIN_SPEC);
-        int tier = (int) Common.getPrefData(GemsterApp.getInstance(), Common.MAIN_TIER);
-        String result = "spen : " + String.valueOf(spec) + ", tier : " + String.valueOf(tier);
-        Log.d("wonseok", "get Data : " + result);
-        return result;
-    }
-
-    /**
-     * Display metadata about AppState save data,
-     *
-     * @param stateKey the slot stateKey of the AppState.
-     */
-    private void displayAppStateMetadata(int stateKey) {
-        String metadataStr = "Source: Cloud Save" + '\n'
-                + "State Key: " + stateKey;
-        Log.d(TAG, metadataStr);
+    private byte[] getData() {
+        return Common.getUserData();
     }
 
     void pushAccomplishments() {
@@ -356,5 +424,29 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
     public static Dialog makeSimpleDialog(Activity activity, String text) {
         return (new AlertDialog.Builder(activity)).setMessage(text)
                 .setNeutralButton(android.R.string.ok, null).create();
+    }
+
+    /**
+     * Show a progress dialog for asynchronous operations.
+     *
+     * @param msg the message to display.
+     */
+    private void showProgressDialog(String msg) {
+        if (mProgressDialog == null && mActivity != null) {
+            mProgressDialog = new ProgressDialog(mActivity);
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.setMessage(msg);
+        mProgressDialog.show();
+    }
+
+    /**
+     * Hide the progress dialog, if it was showing.
+     */
+    private void dismissProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
     }
 }

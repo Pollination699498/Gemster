@@ -171,7 +171,7 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
             Common.setPrefData(mContext, Common.MAIN_TIER, "0");
         }
 
-        // GemsterApp.getInstance().getClient().cloudSaveUpdate();
+        GemsterApp.getInstance().getClient().savedGamesUpdate();
 
         mHandler.post(new Runnable() {
             @Override
@@ -280,11 +280,8 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
     }
 
     public void resetForDebug() {
-        Common.setPrefData(mContext, Common.MAIN_TIER, Common.getDefaultValue(Common.MAIN_TIER));
-        Common.setPrefData(mContext, Common.MAIN_DNA, Common.getDefaultValue(Common.MAIN_DNA));
-        Common.setPrefData(mContext, Common.MAIN_DNA_USE, Common.getDefaultValue(Common.MAIN_DNA_USE));
-        Common.setPrefData(mContext, Common.MAIN_DATA_COLLECT, "");
-        Common.setIsCollected(mContext, 0, 0);
+        Common.resetUserData();
+        GemsterApp.getInstance().getClient().savedGamesUpdate();
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.GAME_VIEW_SET);
     }
 
@@ -303,5 +300,9 @@ public class MonsterMainCoreManager implements MonsterMainInterfaceManager.Event
         }
 
         mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.DEBUG_INFO_SET, desc);
+    }
+
+    public void updateGameView() {
+        mInterfaceManager.call(MonsterMainInterfaceManager.CallMode.GAME_VIEW_SET);
     }
 }

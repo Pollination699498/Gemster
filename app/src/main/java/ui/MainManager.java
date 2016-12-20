@@ -16,7 +16,7 @@ import ui.monstermain.MonsterMainFragment;
  * Created by WONSEOK OH on 2016-12-09.
  */
 
-public class MainManager implements MonsterMainFragment.EventListener {
+public class MainManager implements MonsterMainFragment.EventListener, GoogleApiHelper.EventListener {
 
     private Activity mActivity;
 
@@ -52,7 +52,7 @@ public class MainManager implements MonsterMainFragment.EventListener {
     }
 
     private void initGoogleApiHelper() {
-        GemsterApp.getInstance().setClient(new GoogleApiHelper(mActivity));
+        GemsterApp.getInstance().setClient(new GoogleApiHelper(mActivity, this));
     }
 
     public void handleStart() {
@@ -121,5 +121,11 @@ public class MainManager implements MonsterMainFragment.EventListener {
         }
         SoundManager.stopBGM();
         return false;
+    }
+
+    @Override
+    public void completeLoadSavedData() {
+        mMonsterMainFragment.updateGameView();
+        mMonsterBookFragment.updateMonsterBook();
     }
 }
