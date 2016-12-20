@@ -161,7 +161,7 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
 
         mResolvingConnectionFailure = true;
         if (!resolveConnectionFailure(mActivity, mGoogleApiClient, connectionResult,
-                RC_SIGN_IN, "sign_in_other_error")) {
+                RC_SIGN_IN, "Please sign in for save your game data")) {
             mResolvingConnectionFailure = false;
         }
     }
@@ -435,6 +435,7 @@ public class GoogleApiHelper implements GoogleApiClient.ConnectionCallbacks, Goo
         if (mProgressDialog == null && mActivity != null) {
             mProgressDialog = new ProgressDialog(mActivity);
             mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
         }
 
         mProgressDialog.setMessage(msg);

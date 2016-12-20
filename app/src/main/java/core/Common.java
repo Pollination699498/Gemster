@@ -2,6 +2,8 @@ package core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -234,6 +236,13 @@ public class Common {
         Common.setPrefData(context, Common.MAIN_DNA_USE, Common.getDefaultValue(Common.MAIN_DNA_USE));
         Common.setPrefData(context, Common.MAIN_DATA_COLLECT, "");
         Common.setIsCollected(context, 0, 0);
+    }
+
+    public static boolean isNetworkConnected() {
+        Context context = GemsterApp.getInstance();
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null;
     }
 
 }

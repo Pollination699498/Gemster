@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.SignInButton;
 
+import core.Common;
 import core.CustomOnTouchListener;
 import core.GemsterApp;
 import core.SoundManager;
@@ -133,6 +134,9 @@ public class SettingPopupWindow extends PopupWindow {
 
     private void setSignButtonText() {
         String desc;
+
+        mSignButton.setEnabled(Common.isNetworkConnected());
+
         if (GemsterApp.getInstance().getClient().isConnected()) {
             desc = "change account".toUpperCase();
         } else {
