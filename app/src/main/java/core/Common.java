@@ -215,9 +215,6 @@ public class Common {
             jsonObject.put(MAIN_DNA, String.valueOf((int) getPrefData(MAIN_DNA)));
             jsonObject.put(MAIN_DNA_USE, String.valueOf((int) getPrefData(MAIN_DNA_USE)));
             jsonObject.put(MAIN_DATA_COLLECT, getPrefData(MAIN_DATA_COLLECT));
-
-            jsonObject.put(DISABLE_BGM, getPrefData(DISABLE_BGM));
-            jsonObject.put(DISABLE_EFFECT_SOUND, getPrefData(DISABLE_EFFECT_SOUND));
             return jsonObject.toString().getBytes("UTF-8");
         } catch (JSONException je) {
             je.printStackTrace();
@@ -236,9 +233,6 @@ public class Common {
             setPrefData(MAIN_DNA, jsonObject.get(MAIN_DNA).toString());
             setPrefData(MAIN_DNA_USE, jsonObject.get(MAIN_DNA_USE).toString());
             setPrefData(MAIN_DATA_COLLECT, jsonObject.get(MAIN_DATA_COLLECT).toString());
-
-            setPrefData(DISABLE_BGM, jsonObject.get(DISABLE_BGM).toString());
-            setPrefData(DISABLE_EFFECT_SOUND, jsonObject.get(DISABLE_EFFECT_SOUND).toString());
         } catch (JSONException je) {
             je.printStackTrace();
         } catch (UnsupportedEncodingException usee) {
